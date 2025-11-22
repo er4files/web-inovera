@@ -1,16 +1,24 @@
-// ============================================
-// FILE: components/Blog/index.tsx (UPDATED)
-// ============================================
+"use client";
+
+import { useEffect, useState } from "react";
 import SectionTitle from "../Common/SectionTitle";
 import SingleBlog from "./SingleBlog";
-import { getAllBlogs } from "@/lib/supabase";
+import { getAllBlogs, Blog as BlogType } from "@/lib/supabase";
 
-const Blog = async () => {
-  const blogs = await getAllBlogs();
-  
-  // Ambil 3 blog terbaru saja
-  const latestBlogs = blogs.slice(0, 3);
-  
+const Blog = () => {
+  const [blogs, setBlogs] = useState<BlogType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      const data = await getAllBlogs();
+      setBlogs(data.slice(0, 3)); // Ambil 3 blog terbaru
+      setLoading(false);
+    };
+
+    fetchBlogs();
+  }, []);
+
   return (
     <section
       id="blog"
@@ -23,19 +31,47 @@ const Blog = async () => {
           center
         />
 
-        <div className="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2 md:gap-x-6 lg:gap-x-8 xl:grid-cols-3">
-          {latestBlogs.length === 0 ? (
-            <div className="col-span-full text-center py-10">
-              <p className="text-lg text-body-color">Belum ada blog tersedia.</p>
-            </div>
-          ) : (
-            latestBlogs.map((blog) => (
-              <div key={blog.id} className="w-full">
-                <SingleBlog blog={blog} />
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2 md:gap-x-6 lg:gap-x-8 xl:grid-cols-3">
+            {blogs.length === 0 ? (
+              <div className="col-span-full text-center py-10">
+                <div className="mx-auto max-w-md">
+                  <div className="mb-6">
+                    <svg
+                      className="mx-auto h-20 w-20 text-body-color opacity-50"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="mb-2 text-xl font-bold text-black dark:text-white">
+                    Belum Ada Blog
+                  </h3>
+                  <p className="text-base text-body-color">
+                    Blog akan segera hadir. Pantau terus untuk artikel terbaru!
+                  </p>
+                </div>
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              blogs.map((blog) => (
+                <div key={blog.id} className="w-full">
+                  <SingleBlog blog={blog} />
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       <div className="absolute top-0 left-0 z-[-1] opacity-30 lg:opacity-100 transform rotate-180">
