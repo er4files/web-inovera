@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 // Revalidate setiap 60 detik
 export const revalidate = 60;
-
+export const dynamic = 'force-dynamic';
 const BLOGS_PER_PAGE = 6;
 
 const BlogPage = async ({
