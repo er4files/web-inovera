@@ -1,26 +1,28 @@
-// ============================================
-// FILE: components/Blog/BlogPagination.tsx
-// ============================================
 "use client";
 
-import { Blog } from "@/lib/supabase";
 import SingleBlog from "./SingleBlog";
-import Link from "next/link";
+import { Blog } from "@/lib/supabase";
 
 interface BlogPaginationProps {
   blogs: Blog[];
   currentPage: number;
   totalPages: number;
+  onPageChange: (page: number) => void; // Tambahkan ini
 }
 
-const BlogPagination = ({ blogs, currentPage, totalPages }: BlogPaginationProps) => {
+const BlogPagination = ({ blogs, currentPage, totalPages, onPageChange }: BlogPaginationProps) => {
+  const handlePageChange = (page: number) => {
+    onPageChange(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <div className="-mx-4 flex flex-wrap justify-center">
         {blogs.map((blog) => (
           <div
             key={blog.id}
-            className="w-full px-4 md:w-2/3 lg:w-1/2 xl:w-1/3 mb-10"
+            className="w-full px-4 md:w-2/3 lg:w-1/2 xl:w-1/3"
           >
             <SingleBlog blog={blog} />
           </div>
@@ -29,83 +31,37 @@ const BlogPagination = ({ blogs, currentPage, totalPages }: BlogPaginationProps)
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-12">
-          {/* Previous Button */}
-          <Link
-            href={currentPage > 1 ? `/blog?page=${currentPage - 1}` : "#"}
-            className={`flex h-10 w-10 items-center justify-center rounded-md border transition ${
-              currentPage === 1
-                ? "cursor-not-allowed border-stroke bg-gray-2 text-body-color opacity-50 dark:border-dark-3 dark:bg-dark-2"
-                : "border-primary bg-white text-primary hover:bg-primary hover:text-white dark:border-primary dark:bg-dark dark:hover:bg-primary"
-            }`}
-            onClick={(e) => currentPage === 1 && e.preventDefault()}
+        <div className="mt-12 flex justify-center gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="rounded-md bg-primary px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M10 12L6 8L10 4"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
-
-          {/* Page Numbers */}
+            Previous
+          </button>
+          
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Link
+            <button
               key={page}
-              href={`/blog?page=${page}`}
-              className={`flex h-10 min-w-[40px] items-center justify-center rounded-md border px-3 transition ${
+              onClick={() => handlePageChange(page)}
+              className={`rounded-md px-4 py-2 ${
                 currentPage === page
-                  ? "border-primary bg-primary text-white"
-                  : "border-stroke bg-white text-body-color hover:border-primary hover:bg-primary hover:text-white dark:border-dark-3 dark:bg-dark dark:text-body-color dark:hover:border-primary dark:hover:bg-primary"
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300'
               }`}
             >
               {page}
-            </Link>
+            </button>
           ))}
-
-          {/* Next Button */}
-          <Link
-            href={currentPage < totalPages ? `/blog?page=${currentPage + 1}` : "#"}
-            className={`flex h-10 w-10 items-center justify-center rounded-md border transition ${
-              currentPage === totalPages
-                ? "cursor-not-allowed border-stroke bg-gray-2 text-body-color opacity-50 dark:border-dark-3 dark:bg-dark-2"
-                : "border-primary bg-white text-primary hover:bg-primary hover:text-white dark:border-primary dark:bg-dark dark:hover:bg-primary"
-            }`}
-            onClick={(e) => currentPage === totalPages && e.preventDefault()}
+          
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="rounded-md bg-primary px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6 4L10 8L6 12"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
+            Next
+          </button>
         </div>
-      )}
-
-      {/* Pagination Info */}
-      {totalPages > 1 && (
-        <p className="text-center text-sm text-body-color mt-6">
-          Halaman {currentPage} dari {totalPages}
-        </p>
       )}
     </>
   );
